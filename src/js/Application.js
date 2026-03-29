@@ -11,6 +11,7 @@ import { ParentModule } from "./modules/ParentModule.js";
 import { DriverModule } from "./modules/DriverModule.js";
 import { TrackingModule } from "./modules/TrackingModule.js";
 import { ReportsModule } from "./modules/ReportsModule.js";
+import { RoutesModule } from "./modules/RoutesModule.js";
 import { AdminModule } from "./modules/AdminModule.js";
 import { PaymentsModule } from "./modules/PaymentsModule.js";
 
@@ -30,6 +31,7 @@ export class Application {
       driver: new DriverModule(this.state, this.events, this.renderAll.bind(this), this.transportService),
       tracking: new TrackingModule(this.state, this.events, this.renderAll.bind(this), this.transportService),
       reports: new ReportsModule(this.state, this.events, this.renderAll.bind(this), this.transportService),
+      routes: new RoutesModule(this.state, this.events, this.renderAll.bind(this), this.transportService),
       admin: new AdminModule(this.state, this.events, this.renderAll.bind(this), this.transportService),
       payments: new PaymentsModule(this.state, this.events, this.renderAll.bind(this), this.transportService),
     };
@@ -41,6 +43,7 @@ export class Application {
       { id: "driver", label: "Driver Panel" },
       { id: "tracking", label: "Live Tracking" },
       { id: "reports", label: "Reports" },
+      { id: "routes", label: "Route Management" },
       { id: "admin", label: "Admin Dashboard" },
       { id: "payments", label: "Payments" },
     ];

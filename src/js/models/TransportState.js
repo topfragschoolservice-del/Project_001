@@ -13,6 +13,11 @@ export class TransportState {
       { id: "D-02", name: "Niroshan Gamage", route: "Route B", status: "Delayed 5 mins" },
       { id: "D-03", name: "Sampath Nadeeka", route: "Route C", status: "On time" },
     ];
+    this.routes = [
+      { id: "R-101", name: "Route A", start: "Malabe", end: "Greenfield School", capacity: 18, driverId: "D-01" },
+      { id: "R-102", name: "Route B", start: "Kaduwela", end: "Greenfield School", capacity: 20, driverId: "D-02" },
+      { id: "R-103", name: "Route C", start: "Battaramulla", end: "Greenfield School", capacity: 16, driverId: "D-03" },
+    ];
     this.vehicleProgress = 26;
     this.monthlyReport = {
       attendanceRate: 93,
@@ -81,12 +86,103 @@ export class TransportState {
     }
   }
 
+  createRoute({ name, start, end, capacity, driverId }) {
+    const route = {
+      id: `R-${Math.floor(100 + Math.random() * 900)}`,
+      name,
+      start,
+      end,
+      capacity,
+      driverId: driverId || null,
+    };
+    this.routes.push(route);
+
+    if (driverId) {
+      const driver = this.drivers.find((d) => d.id === driverId);
+      if (driver) driver.route = name;
+    }
+
+    return route;
+  }
+
+  assignDriverToRoute(routeId, driverId) {
+    const route = this.routes.find((r) => r.id === routeId);
+    if (!route) return null;
+
+    const driver = this.drivers.find((d) => d.id === driverId);
+    if (!driver) return null;
+
+    route.driverId = driverId;
+    route.name = route.name || `Route ${routeId}`;
+    driver.route = route.name;
+    return route;
+  }
+
+  updateRoute(routeId, { name, start, end, capacity, driverId }) {
+    const route = this.routes.find((r) => r.id === routeId);
+    if (!route) return null;
+
+    const previousName = route.name;
+
+    route.name = name;
+    route.start = start;
+    route.end = end;
+    route.capacity = capacity;
+
+    if (driverId) {
+      route.driverId = driverId;
+    }
+
+    if (previousName !== route.name) {
+      this.students.forEach((s) => {
+        if (s.route === previousName) {
+          s.route = route.name;
+        }
+      });
+
+      this.drivers.forEach((d) => {
+        if (d.route === previousName) {
+          d.route = route.name;
+        }
+      });
+    }
+
+    const assignedDriver = this.drivers.find((d) => d.id === route.driverId);
+    if (assignedDriver) {
+      assignedDriver.route = route.name;
+    }
+
+    return route;
+  }
+
+  deleteRoute(routeId) {
+    const index = this.routes.findIndex((r) => r.id === routeId);
+    if (index === -1) return null;
+
+    const [route] = this.routes.splice(index, 1);
+
+    this.drivers.forEach((d) => {
+      if (d.route === route.name) {
+        d.route = "Unassigned";
+      }
+    });
+
+    this.students.forEach((s) => {
+      if (s.route === route.name) {
+        s.route = "Unassigned";
+      }
+    });
+
+    return route;
+  }
+
   snapshot() {
     return {
       schoolName: this.schoolName,
       date: this.date.toISOString(),
       students: this.students,
       drivers: this.drivers,
+      routes: this.routes,
       vehicleProgress: this.vehicleProgress,
       monthlyReport: this.monthlyReport,
       history: this.history,
@@ -99,6 +195,7 @@ export class TransportState {
     this.date = payload.date ? new Date(payload.date) : this.date;
     this.students = Array.isArray(payload.students) ? payload.students : this.students;
     this.drivers = Array.isArray(payload.drivers) ? payload.drivers : this.drivers;
+    this.routes = Array.isArray(payload.routes) ? payload.routes : this.routes;
     this.vehicleProgress = typeof payload.vehicleProgress === "number" ? payload.vehicleProgress : this.vehicleProgress;
     this.monthlyReport = payload.monthlyReport || this.monthlyReport;
     this.history = Array.isArray(payload.history) ? payload.history : this.history;

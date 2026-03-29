@@ -50,4 +50,32 @@ export class TransportService {
     this.events.push("Simulation executed for pickup and drop-off flow", "info", "system");
     return true;
   }
+
+  async createRoute(payload) {
+    const route = await this.api.createRoute(payload);
+    if (!route) return null;
+    this.events.push(`Route created: ${route.name}`, "info", "admin");
+    return route;
+  }
+
+  async assignDriverToRoute(routeId, driverId) {
+    const route = await this.api.assignDriverToRoute(routeId, driverId);
+    if (!route) return null;
+    this.events.push(`Driver assigned to ${route.name}`, "info", "admin");
+    return route;
+  }
+
+  async updateRoute(routeId, payload) {
+    const route = await this.api.updateRoute(routeId, payload);
+    if (!route) return null;
+    this.events.push(`Route updated: ${route.name}`, "info", "admin");
+    return route;
+  }
+
+  async deleteRoute(routeId) {
+    const route = await this.api.deleteRoute(routeId);
+    if (!route) return null;
+    this.events.push(`Route removed: ${route.name}`, "warn", "admin");
+    return route;
+  }
 }

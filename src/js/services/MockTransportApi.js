@@ -32,4 +32,20 @@ export class MockTransportApi {
     });
     return true;
   }
+
+  async createRoute(payload) {
+    return this.state.createRoute(payload);
+  }
+
+  async assignDriverToRoute(routeId, driverId) {
+    return this.state.assignDriverToRoute(routeId, driverId);
+  }
+
+  async updateRoute(routeId, payload) {
+    return this.state.updateRoute(routeId, payload);
+  }
+
+  async deleteRoute(routeId) {
+    return this.state.deleteRoute(routeId);
+  }
 }
