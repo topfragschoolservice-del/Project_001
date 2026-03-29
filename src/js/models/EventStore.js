@@ -14,4 +14,13 @@ export class EventStore {
     this.items.unshift(this.makeEvent(message, type));
     this.items = this.items.slice(0, 18);
   }
+
+  snapshot() {
+    return this.items;
+  }
+
+  hydrate(items) {
+    if (!Array.isArray(items)) return;
+    this.items = items.slice(0, 18);
+  }
 }
