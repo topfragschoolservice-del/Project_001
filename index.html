@@ -12,24 +12,64 @@
 <body>
   <div class="bg-layer"></div>
   <header class="topbar shell">
-    <div>
-      <p class="kicker">School Mobility Platform</p>
-      <h1>Smart Transport Management</h1>
+    <div class="brand-box">
+      <p class="kicker">Top Frag Group</p>
+      <p class="topfrag-chip">Top Frag</p>
+      <h1>Top Frag Smart Transport</h1>
+      <p class="soft">Organized daily transport operations for parents, drivers, and administrators.</p>
     </div>
     <div class="top-actions">
-      <form id="roleForm" class="role-form">
-        <div>
-          <label for="loginEmail">Email</label>
-          <input id="loginEmail" type="email" placeholder="user@school.lk" required />
-        </div>
-        <div>
-          <label for="loginPassword">Password</label>
-          <input id="loginPassword" type="password" placeholder="Enter password" required />
-        </div>
-        <button class="btn primary" type="submit">Sign In</button>
-      </form>
-      <button id="btnLogout" class="btn ghost">Logout</button>
-      <button id="btnSimulateDay" class="btn ghost">Simulate School Day</button>
+      <div class="auth-stack">
+        <form id="roleForm" class="role-form login-form">
+          <h3>Login</h3>
+          <div>
+            <label for="loginEmail">Email</label>
+            <input id="loginEmail" type="email" placeholder="user@school.lk" required />
+          </div>
+          <div>
+            <label for="loginPassword">Password</label>
+            <input id="loginPassword" type="password" placeholder="Enter password" required />
+          </div>
+          <button class="btn primary" type="submit">Sign In</button>
+        </form>
+
+        <form id="registerForm" class="role-form register-form">
+          <h3>Create Account</h3>
+          <div>
+            <label for="registerName">Full Name</label>
+            <input id="registerName" type="text" placeholder="Your name" required />
+          </div>
+          <div>
+            <label for="registerEmail">Email</label>
+            <input id="registerEmail" type="email" placeholder="new@school.lk" required />
+          </div>
+          <div>
+            <label for="registerPhone">Phone Number</label>
+            <input id="registerPhone" type="tel" placeholder="+94 77 123 4567" required />
+          </div>
+          <div>
+            <label for="registerPassword">Password</label>
+            <input id="registerPassword" type="password" placeholder="Min 6 characters" required />
+          </div>
+          <div>
+            <label for="registerRole">Role</label>
+            <select id="registerRole" required>
+              <option value="parent">Parent</option>
+              <option value="driver">Driver</option>
+              <option value="admin">Admin</option>
+            </select>
+          </div>
+          <button class="btn warn" type="submit">Register</button>
+        </form>
+      </div>
+
+      <div class="action-group">
+        <button id="btnLogout" class="btn ghost">Logout</button>
+        <button id="btnSimulateDay" class="btn ghost">Simulate School Day</button>
+        <button id="btnShowOverview" class="btn ghost" type="button">Overview</button>
+        <button id="btnShowTracking" class="btn ghost" type="button">Live Tracking</button>
+      </div>
+
       <p class="auth-hint">Demo: parent@school.lk / parent123, driver@school.lk / driver123, admin@school.lk / admin123</p>
     </div>
   </header>
@@ -42,6 +82,18 @@
       <div class="status-block">
         <h3>Today</h3>
         <p id="todayDate"></p>
+      </div>
+      <div class="status-block">
+        <h3>Quick Actions</h3>
+        <div class="btn-row">
+          <button id="btnNavParent" type="button" class="btn ghost">Parent</button>
+          <button id="btnNavDriver" type="button" class="btn ghost">Driver</button>
+          <button id="btnNavReports" type="button" class="btn ghost">Reports</button>
+        </div>
+      </div>
+      <div class="status-block team-block">
+        <h3>Top Frag</h3>
+        <p class="soft">Group dashboard with role-based transport control and monitoring.</p>
       </div>
     </aside>
 

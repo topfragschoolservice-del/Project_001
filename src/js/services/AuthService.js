@@ -20,4 +20,16 @@ export class AuthService {
     if (!userName || !role) return;
     this.events.push(`${userName} signed out`, "info", "auth");
   }
+
+  async register(name, email, phone, password, role) {
+    const result = await this.authApi.register({ name, email, phone, password, role });
+    if (!result?.ok) {
+      this.events.push(result?.error || "Registration failed", "warn", "auth");
+      return null;
+    }
+
+    const roleLabel = result.user.role.charAt(0).toUpperCase() + result.user.role.slice(1);
+    this.events.push(`${result.user.name} created a ${roleLabel} account`, "info", "auth");
+    return result.user;
+  }
 }

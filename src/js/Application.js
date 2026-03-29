@@ -71,8 +71,14 @@ export class Application {
 
   setupAuth() {
     const roleForm = document.querySelector("#roleForm");
+    const registerForm = document.querySelector("#registerForm");
     const loginEmail = document.querySelector("#loginEmail");
     const loginPassword = document.querySelector("#loginPassword");
+    const registerName = document.querySelector("#registerName");
+    const registerEmail = document.querySelector("#registerEmail");
+    const registerPhone = document.querySelector("#registerPhone");
+    const registerPassword = document.querySelector("#registerPassword");
+    const registerRole = document.querySelector("#registerRole");
     const logoutBtn = document.querySelector("#btnLogout");
 
     roleForm.addEventListener("submit", async (e) => {
@@ -88,6 +94,27 @@ export class Application {
 
       loginPassword.value = "";
       this.activeModule = this.auth.allowedModules()[0];
+      this.renderAll();
+    });
+
+    registerForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const user = await this.authService.register(
+        registerName.value,
+        registerEmail.value,
+        registerPhone.value,
+        registerPassword.value,
+        registerRole.value,
+      );
+
+      if (!user || !this.auth.loginWithUser(user)) {
+        this.renderAll();
+        return;
+      }
+
+      registerPassword.value = "";
+      this.activeModule = this.auth.allowedModules()[0] || "dashboard";
       this.renderAll();
     });
 
@@ -166,6 +193,35 @@ export class Application {
       await this.transportService.simulateSchoolDay();
       this.renderAll();
     });
+
+    document.querySelector("#btnShowOverview").addEventListener("click", () => {
+      this.activeModule = this.auth.isLoggedIn() ? (this.auth.allowedModules()[0] || "dashboard") : "dashboard";
+      this.renderAll();
+    });
+
+    document.querySelector("#btnShowTracking").addEventListener("click", () => {
+      if (!this.auth.isLoggedIn() || !this.auth.allowedModules().includes("tracking")) return;
+      this.activeModule = "tracking";
+      this.renderAll();
+    });
+
+    document.querySelector("#btnNavParent").addEventListener("click", () => {
+      if (!this.auth.isLoggedIn() || !this.auth.allowedModules().includes("parent")) return;
+      this.activeModule = "parent";
+      this.renderAll();
+    });
+
+    document.querySelector("#btnNavDriver").addEventListener("click", () => {
+      if (!this.auth.isLoggedIn() || !this.auth.allowedModules().includes("driver")) return;
+      this.activeModule = "driver";
+      this.renderAll();
+    });
+
+    document.querySelector("#btnNavReports").addEventListener("click", () => {
+      if (!this.auth.isLoggedIn() || !this.auth.allowedModules().includes("reports")) return;
+      this.activeModule = "reports";
+      this.renderAll();
+    });
   }
 
   renderAll() {
@@ -211,8 +267,46 @@ export class Application {
     if (!this.auth.isLoggedIn()) {
       const dashboard = document.querySelector("#dashboard");
       dashboard.innerHTML = `
-        <h2>Welcome</h2>
-        <p class="soft">Sign in from the top-right area to access role-based modules.</p>
+        <section class="hero-banner guest-banner">
+          <div>
+            <p class="soft">Welcome to Smart Transport</p>
+            <h2>Organized School Mobility Dashboard</h2>
+            <p class="soft">Sign in or create an account to unlock role-based modules, live updates, and reporting tools.</p>
+          </div>
+          <div class="hero-badges">
+            <span class="badge ok">Role Based Access</span>
+            <span class="badge warn">Live Tracking</span>
+            <span class="badge ok">Smart Reports</span>
+          </div>
+        </section>
+        <div class="quick-grid">
+          <article class="quick-card"><h4>Parent Tools</h4><p class="soft">Attendance, pickup status, and payments.</p></article>
+          <article class="quick-card"><h4>Driver Tools</h4><p class="soft">Trip operations and live route handling.</p></article>
+          <article class="quick-card"><h4>Admin Tools</h4><p class="soft">Routes, assignments, and exports.</p></article>
+        </div>
+        <div class="split guest-fill-grid">
+          <div class="block guest-block">
+            <h3>Top Frag Operations</h3>
+            <ul>
+              <li>Centralized attendance and pickup visibility</li>
+              <li>Daily route readiness and driver availability</li>
+              <li>Quick access to reports and payment workflows</li>
+            </ul>
+          </div>
+          <div class="block guest-block">
+            <h3>Getting Started</h3>
+            <ul>
+              <li>Sign in with your role to unlock modules</li>
+              <li>Use "Simulate School Day" to generate live events</li>
+              <li>Switch modules from left navigation anytime</li>
+            </ul>
+          </div>
+        </div>
+        <div class="card-grid guest-bottom-grid">
+          <article class="stat-card light-block"><p>Live Modules</p><strong>8</strong></article>
+          <article class="stat-card blue-block"><p>Role Types</p><strong>3</strong></article>
+          <article class="stat-card light-block"><p>Activity Feed</p><strong>Real-Time</strong></article>
+        </div>
       `;
       document.querySelectorAll(".module").forEach((module) => {
         module.classList.toggle("active", module.dataset.module === "dashboard");
