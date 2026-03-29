@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Smart School Transport</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="src/styles.css" />
+</head>
+<body>
+  <div class="bg-layer"></div>
+  <header class="topbar shell">
+    <div>
+      <p class="kicker">School Mobility Platform</p>
+      <h1>Smart Transport Management</h1>
+    </div>
+    <button id="btnSimulateDay" class="btn ghost">Simulate School Day</button>
+  </header>
+
+  <main class="shell grid-layout">
+    <aside class="panel nav-panel">
+      <h2>Modules</h2>
+      <nav id="moduleNav" class="module-nav"></nav>
+      <div class="status-block">
+        <h3>Today</h3>
+        <p id="todayDate"></p>
+      </div>
+    </aside>
+
+    <section class="panel content-panel">
+      <section id="dashboard" data-module="dashboard" class="module active"></section>
+      <section id="parent" data-module="parent" class="module"></section>
+      <section id="driver" data-module="driver" class="module"></section>
+      <section id="tracking" data-module="tracking" class="module"></section>
+      <section id="admin" data-module="admin" class="module"></section>
+      <section id="payments" data-module="payments" class="module"></section>
+    </section>
+
+    <aside class="panel notif-panel">
+      <h2>Event Feed</h2>
+      <p class="soft">Pickup, drop-off, attendance, and payment events</p>
+      <ul id="eventFeed" class="event-feed"></ul>
+    </aside>
+  </main>
+
+  <script type="module" src="src/js/main.js"></script>
+</body>
+</html>
