@@ -1,4 +1,5 @@
 import { BaseModule } from "./BaseModule.js";
+import { ReportExportService } from "../services/ReportExportService.js";
 
 export class ReportsModule extends BaseModule {
   render(root) {
@@ -16,6 +17,17 @@ export class ReportsModule extends BaseModule {
       </div>
 
       <div class="block" style="margin-top: 1rem;">
+        <h3>Monthly Export</h3>
+        <div class="btn-row report-actions">
+          <div>
+            <label for="reportMonth">Month</label>
+            <input id="reportMonth" type="month" value="${this.currentMonthValue()}" />
+          </div>
+          <button id="btnExportCsv" class="btn primary" type="button">Export CSV Report</button>
+        </div>
+      </div>
+
+      <div class="block" style="margin-top: 1rem;">
         <h3>Recent Attendance and Transport History</h3>
         <div class="table-wrap">
           <table>
@@ -29,6 +41,24 @@ export class ReportsModule extends BaseModule {
         </div>
       </div>
     `;
+
+    root.querySelector("#btnExportCsv").addEventListener("click", () => {
+      const period = root.querySelector("#reportMonth").value || this.currentMonthValue();
+      const rows = ReportExportService.buildMonthlyReportRows({
+        period,
+        metrics,
+        students: this.state.students,
+        history: this.state.history.slice(0, 80),
+      });
+      const csv = ReportExportService.toCsv(rows);
+      ReportExportService.downloadCsv(`transport-report-${period}.csv`, csv);
+      this.events.push(`Monthly report exported for ${period}`, "info", "system");
+      this.onChange();
+    });
+  }
+
+  currentMonthValue() {
+    return this.state.date.toISOString().slice(0, 7);
   }
 
   buildMetrics() {

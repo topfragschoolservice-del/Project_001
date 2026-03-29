@@ -237,6 +237,14 @@ select {
   flex-wrap: wrap;
 }
 
+.report-actions {
+  align-items: end;
+}
+
+.report-actions input {
+  min-width: 170px;
+}
+
 .btn {
   border: none;
   border-radius: 11px;
