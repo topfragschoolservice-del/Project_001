@@ -28,4 +28,16 @@ export class AuthSession {
     if (!this.currentRole) return [];
     return this.accessMap[this.currentRole];
   }
+
+  snapshot() {
+    return { currentRole: this.currentRole };
+  }
+
+  hydrate(payload) {
+    if (!payload || !payload.currentRole) {
+      this.currentRole = null;
+      return;
+    }
+    this.currentRole = this.accessMap[payload.currentRole] ? payload.currentRole : null;
+  }
 }
