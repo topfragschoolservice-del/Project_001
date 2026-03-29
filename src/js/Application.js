@@ -6,6 +6,7 @@ import { DashboardModule } from "./modules/DashboardModule.js";
 import { ParentModule } from "./modules/ParentModule.js";
 import { DriverModule } from "./modules/DriverModule.js";
 import { TrackingModule } from "./modules/TrackingModule.js";
+import { ReportsModule } from "./modules/ReportsModule.js";
 import { AdminModule } from "./modules/AdminModule.js";
 import { PaymentsModule } from "./modules/PaymentsModule.js";
 
@@ -20,6 +21,7 @@ export class Application {
       parent: new ParentModule(this.state, this.events, this.renderAll.bind(this)),
       driver: new DriverModule(this.state, this.events, this.renderAll.bind(this)),
       tracking: new TrackingModule(this.state, this.events, this.renderAll.bind(this)),
+      reports: new ReportsModule(this.state, this.events, this.renderAll.bind(this)),
       admin: new AdminModule(this.state, this.events, this.renderAll.bind(this)),
       payments: new PaymentsModule(this.state, this.events, this.renderAll.bind(this)),
     };
@@ -29,6 +31,7 @@ export class Application {
       { id: "parent", label: "Parent Portal" },
       { id: "driver", label: "Driver Panel" },
       { id: "tracking", label: "Live Tracking" },
+      { id: "reports", label: "Reports" },
       { id: "admin", label: "Admin Dashboard" },
       { id: "payments", label: "Payments" },
     ];

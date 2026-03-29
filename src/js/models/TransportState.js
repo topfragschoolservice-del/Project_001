@@ -19,6 +19,18 @@ export class TransportState {
       pickupOnTime: 89,
       paymentCompletion: 84,
     };
+    this.history = [];
+  }
+
+  logHistory(type, student, details) {
+    this.history.unshift({
+      id: crypto.randomUUID(),
+      type,
+      student,
+      details,
+      createdAt: new Date().toISOString(),
+    });
+    this.history = this.history.slice(0, 160);
   }
 
   markAttendance(studentId, attending, returnTrip) {
@@ -30,6 +42,11 @@ export class TransportState {
       student.pickup = "n/a";
       student.drop = "n/a";
     }
+    this.logHistory(
+      "attendance",
+      student.name,
+      `Attend: ${attending ? "Yes" : "No"}, Return: ${returnTrip ? "Yes" : "No"}`,
+    );
     return student;
   }
 
@@ -37,6 +54,7 @@ export class TransportState {
     const student = this.students.find((s) => s.id === studentId);
     if (!student) return null;
     student.pickup = status;
+    this.logHistory("pickup", student.name, `Pickup status changed to ${status}`);
     return student;
   }
 
@@ -44,6 +62,7 @@ export class TransportState {
     const student = this.students.find((s) => s.id === studentId);
     if (!student) return null;
     student.drop = status;
+    this.logHistory("dropoff", student.name, `Drop-off status changed to ${status}`);
     return student;
   }
 
@@ -51,6 +70,7 @@ export class TransportState {
     const student = this.students.find((s) => s.id === studentId);
     if (!student) return null;
     student.paymentDue = 0;
+    this.logHistory("payment", student.name, "Transport fee marked as paid");
     return student;
   }
 
@@ -69,6 +89,7 @@ export class TransportState {
       drivers: this.drivers,
       vehicleProgress: this.vehicleProgress,
       monthlyReport: this.monthlyReport,
+      history: this.history,
     };
   }
 
@@ -80,5 +101,6 @@ export class TransportState {
     this.drivers = Array.isArray(payload.drivers) ? payload.drivers : this.drivers;
     this.vehicleProgress = typeof payload.vehicleProgress === "number" ? payload.vehicleProgress : this.vehicleProgress;
     this.monthlyReport = payload.monthlyReport || this.monthlyReport;
+    this.history = Array.isArray(payload.history) ? payload.history : this.history;
   }
 }

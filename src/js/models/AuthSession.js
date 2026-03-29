@@ -2,9 +2,9 @@ export class AuthSession {
   constructor() {
     this.currentRole = null;
     this.accessMap = {
-      parent: ["parent", "tracking", "payments"],
+      parent: ["parent", "tracking", "reports", "payments"],
       driver: ["driver", "tracking"],
-      admin: ["dashboard", "parent", "driver", "tracking", "admin", "payments"],
+      admin: ["dashboard", "parent", "driver", "tracking", "reports", "admin", "payments"],
     };
   }
 
