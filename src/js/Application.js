@@ -1,5 +1,6 @@
 import { EventStore } from "./models/EventStore.js";
 import { TransportState } from "./models/TransportState.js";
+import { AuthSession } from "./models/AuthSession.js";
 import { DashboardModule } from "./modules/DashboardModule.js";
 import { ParentModule } from "./modules/ParentModule.js";
 import { DriverModule } from "./modules/DriverModule.js";
@@ -11,6 +12,7 @@ export class Application {
   constructor() {
     this.state = new TransportState();
     this.events = new EventStore();
+    this.auth = new AuthSession();
     this.modules = {
       dashboard: new DashboardModule(this.state, this.events, this.renderAll.bind(this)),
       parent: new ParentModule(this.state, this.events, this.renderAll.bind(this)),
@@ -31,16 +33,44 @@ export class Application {
   }
 
   mount() {
+    this.setupAuth();
     this.setupNav();
     this.setupGlobalActions();
     this.renderAll();
   }
 
+  setupAuth() {
+    const roleForm = document.querySelector("#roleForm");
+    const roleSelect = document.querySelector("#roleSelect");
+    const logoutBtn = document.querySelector("#btnLogout");
+
+    roleForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const selectedRole = roleSelect.value;
+      if (!this.auth.login(selectedRole)) {
+        this.events.push("Please select a valid role to continue", "warn");
+        this.renderAll();
+        return;
+      }
+      const roleLabel = selectedRole.charAt(0).toUpperCase() + selectedRole.slice(1);
+      this.events.push(`${roleLabel} logged in`, "info");
+      this.activeModule = this.auth.allowedModules()[0];
+      this.renderAll();
+    });
+
+    logoutBtn.addEventListener("click", () => {
+      if (!this.auth.isLoggedIn()) return;
+      const roleLabel = this.auth.currentRole;
+      this.auth.logout();
+      this.activeModule = "dashboard";
+      this.events.push(`${roleLabel} logged out`, "info");
+      this.renderAll();
+    });
+  }
+
   setupNav() {
     const nav = document.querySelector("#moduleNav");
-    nav.innerHTML = this.navConfig
-      .map((item) => `<button data-target="${item.id}">${item.label}</button>`)
-      .join("");
+    nav.innerHTML = this.navConfig.map((item) => `<button data-target="${item.id}">${item.label}</button>`).join("");
 
     nav.addEventListener("click", (e) => {
       const btn = e.target.closest("button[data-target]");
@@ -55,6 +85,11 @@ export class Application {
     todayDate.textContent = this.state.date.toDateString();
 
     document.querySelector("#btnSimulateDay").addEventListener("click", () => {
+      if (!this.auth.isLoggedIn()) {
+        this.events.push("Login required to run simulation", "warn");
+        this.renderAll();
+        return;
+      }
       this.state.students.forEach((s) => {
         if (!s.attending) return;
         s.pickup = Math.random() > 0.12 ? "picked" : "pending";
@@ -72,16 +107,49 @@ export class Application {
   }
 
   renderNavState() {
+    const allowedSet = new Set(this.auth.allowedModules());
+    const isLoggedIn = this.auth.isLoggedIn();
+    const roleNode = document.querySelector("#activeRole");
+    const roleLabel = isLoggedIn
+      ? this.auth.currentRole.charAt(0).toUpperCase() + this.auth.currentRole.slice(1)
+      : "Guest";
+    roleNode.textContent = `Role: ${roleLabel}`;
+
     document.querySelectorAll("#moduleNav button").forEach((btn) => {
-      btn.classList.toggle("active", btn.dataset.target === this.activeModule);
+      const target = btn.dataset.target;
+      const hasAccess = allowedSet.has(target);
+      btn.style.display = hasAccess ? "block" : "none";
+      btn.disabled = !hasAccess;
+      btn.classList.toggle("active", target === this.activeModule);
     });
 
     document.querySelectorAll(".module").forEach((module) => {
-      module.classList.toggle("active", module.dataset.module === this.activeModule);
+      const moduleId = module.dataset.module;
+      const showModule = isLoggedIn && allowedSet.has(moduleId) && moduleId === this.activeModule;
+      module.classList.toggle("active", showModule);
     });
+
+    const simulateBtn = document.querySelector("#btnSimulateDay");
+    simulateBtn.disabled = !isLoggedIn;
+
+    if (isLoggedIn && !allowedSet.has(this.activeModule)) {
+      this.activeModule = this.auth.allowedModules()[0] || "dashboard";
+    }
   }
 
   renderModules() {
+    if (!this.auth.isLoggedIn()) {
+      const dashboard = document.querySelector("#dashboard");
+      dashboard.innerHTML = `
+        <h2>Welcome</h2>
+        <p class="soft">Select a role from the top-right area to access modules.</p>
+      `;
+      document.querySelectorAll(".module").forEach((module) => {
+        module.classList.toggle("active", module.dataset.module === "dashboard");
+      });
+      return;
+    }
+
     Object.entries(this.modules).forEach(([id, instance]) => {
       const root = document.querySelector(`#${id}`);
       instance.render(root);
