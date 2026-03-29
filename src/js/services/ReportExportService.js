@@ -39,4 +39,26 @@ export class ReportExportService {
 
     return rows;
   }
+
+  static buildRouteReportRows({ period, route, students, history }) {
+    const rows = [
+      ["Smart School Transport Route Report"],
+      ["Period", period],
+      ["Route", route.name],
+      ["From", route.start],
+      ["To", route.end],
+      ["Capacity", route.capacity],
+      ["Generated At", new Date().toISOString()],
+      [],
+      ["Students On Route"],
+      ["Student ID", "Student Name", "Attendance", "Return Trip", "Payment Due (LKR)"],
+      ...students.map((s) => [s.id, s.name, s.attending ? "Yes" : "No", s.returnTrip ? "Yes" : "No", s.paymentDue]),
+      [],
+      ["Related History"],
+      ["Timestamp", "Type", "Student", "Details"],
+      ...history.map((h) => [new Date(h.createdAt).toISOString(), h.type, h.student, h.details]),
+    ];
+
+    return rows;
+  }
 }

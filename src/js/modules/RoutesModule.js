@@ -101,8 +101,17 @@ export class RoutesModule extends BaseModule {
         driverId: root.querySelector("#routeDriver").value || null,
       };
 
+      if (payload.capacity < 5) {
+        this.events.push("Route capacity must be at least 5", "warn", "admin");
+        this.onChange();
+        return;
+      }
+
       const route = await this.transportService.createRoute(payload);
       if (!route) return;
+      root.querySelector("#routeForm").reset();
+      root.querySelector("#routeEnd").value = "Greenfield School";
+      root.querySelector("#routeCapacity").value = 20;
       this.onChange();
     });
 
@@ -126,6 +135,18 @@ export class RoutesModule extends BaseModule {
         driverId: root.querySelector("#editRouteDriver").value || null,
       };
 
+      const existingRoute = this.state.routes.find((r) => r.id === routeId);
+      const assignedCount = this.studentsOnRoute(existingRoute?.name || "");
+      if (payload.capacity < assignedCount) {
+        this.events.push(
+          `Capacity cannot be less than assigned students (${assignedCount})`,
+          "warn",
+          "admin",
+        );
+        this.onChange();
+        return;
+      }
+
       const updated = await this.transportService.updateRoute(routeId, payload);
       if (!updated) return;
       this.onChange();
@@ -145,6 +166,8 @@ export class RoutesModule extends BaseModule {
       btn.addEventListener("click", async (e) => {
         const routeId = e.target.dataset.deleteRoute;
         if (!routeId) return;
+        const confirmed = confirm("Delete this route? Drivers and students on this route will become unassigned.");
+        if (!confirmed) return;
         await this.transportService.deleteRoute(routeId);
         this.onChange();
       });
@@ -187,11 +210,13 @@ export class RoutesModule extends BaseModule {
 
     return this.state.routes.map((route) => {
       const driver = this.state.drivers.find((d) => d.id === route.driverId);
+      const assigned = this.studentsOnRoute(route.name);
+      const status = this.routeStatus(route, assigned);
       return `
         <tr>
           <td>${route.name}</td>
           <td>${route.start} -> ${route.end}</td>
-          <td>${route.capacity}</td>
+          <td>${route.capacity} <small>(${assigned} students)</small></td>
           <td>
             <select data-assign-driver data-route-id="${route.id}">
               <option value="">Select</option>
@@ -199,9 +224,26 @@ export class RoutesModule extends BaseModule {
             </select>
             <small>${driver ? `Current: ${driver.name}` : "Unassigned"}</small>
           </td>
-          <td><button class="btn warn" data-delete-route="${route.id}" type="button">Delete</button></td>
+          <td>
+            <span class="badge ${status.level}">${status.label}</span>
+            <button class="btn warn" data-delete-route="${route.id}" type="button">Delete</button>
+          </td>
         </tr>
       `;
     }).join("");
+  }
+
+  studentsOnRoute(routeName) {
+    return this.state.students.filter((student) => student.route === routeName).length;
+  }
+
+  routeStatus(route, assigned) {
+    if (!route.driverId) {
+      return { label: "Unassigned Driver", level: "warn" };
+    }
+    if (assigned > route.capacity) {
+      return { label: "Over Capacity", level: "danger" };
+    }
+    return { label: "Active", level: "ok" };
   }
 }

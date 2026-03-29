@@ -28,6 +28,17 @@ export class ReportsModule extends BaseModule {
       </div>
 
       <div class="block" style="margin-top: 1rem;">
+        <h3>Route-wise Export</h3>
+        <div class="btn-row report-actions">
+          <div>
+            <label for="reportRoute">Route</label>
+            <select id="reportRoute">${this.routeOptions()}</select>
+          </div>
+          <button id="btnExportRouteCsv" class="btn ghost" type="button">Export Route CSV</button>
+        </div>
+      </div>
+
+      <div class="block" style="margin-top: 1rem;">
         <h3>Recent Attendance and Transport History</h3>
         <div class="table-wrap">
           <table>
@@ -53,6 +64,35 @@ export class ReportsModule extends BaseModule {
       const csv = ReportExportService.toCsv(rows);
       ReportExportService.downloadCsv(`transport-report-${period}.csv`, csv);
       this.events.push(`Monthly report exported for ${period}`, "info", "system");
+      this.onChange();
+    });
+
+    root.querySelector("#btnExportRouteCsv").addEventListener("click", () => {
+      const period = root.querySelector("#reportMonth").value || this.currentMonthValue();
+      const routeId = root.querySelector("#reportRoute").value;
+      const route = this.state.routes.find((r) => r.id === routeId);
+      if (!route) {
+        this.events.push("Please select a route before export", "warn", "system");
+        this.onChange();
+        return;
+      }
+
+      const routeStudents = this.state.students.filter((s) => s.route === route.name);
+      const routeStudentNames = new Set(routeStudents.map((s) => s.name));
+      const routeHistory = this.state.history
+        .filter((h) => routeStudentNames.has(h.student))
+        .slice(0, 120);
+
+      const rows = ReportExportService.buildRouteReportRows({
+        period,
+        route,
+        students: routeStudents,
+        history: routeHistory,
+      });
+      const csv = ReportExportService.toCsv(rows);
+      const safeRoute = route.name.toLowerCase().replace(/\s+/g, "-");
+      ReportExportService.downloadCsv(`route-report-${safeRoute}-${period}.csv`, csv);
+      this.events.push(`Route report exported: ${route.name}`, "info", "system");
       this.onChange();
     });
   }
@@ -89,5 +129,13 @@ export class ReportsModule extends BaseModule {
       const stamp = new Date(entry.createdAt).toLocaleString();
       return `<tr><td>${stamp}</td><td>${entry.type}</td><td>${entry.student}</td><td>${entry.details}</td></tr>`;
     }).join("");
+  }
+
+  routeOptions() {
+    if (!this.state.routes || this.state.routes.length === 0) {
+      return "<option value=\"\">No routes</option>";
+    }
+
+    return this.state.routes.map((route) => `<option value="${route.id}">${route.name}</option>`).join("");
   }
 }

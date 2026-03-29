@@ -48,4 +48,28 @@ export class MockTransportApi {
   async deleteRoute(routeId) {
     return this.state.deleteRoute(routeId);
   }
+
+  async createStudent(payload) {
+    return this.state.createStudent(payload);
+  }
+
+  async updateStudentRoute(studentId, route) {
+    return this.state.updateStudentRoute(studentId, route);
+  }
+
+  async deleteStudent(studentId) {
+    return this.state.deleteStudent(studentId);
+  }
+
+  async createDriver(payload) {
+    return this.state.createDriver(payload);
+  }
+
+  async updateDriverStatus(driverId, status) {
+    return this.state.updateDriverStatus(driverId, status);
+  }
+
+  async deleteDriver(driverId) {
+    return this.state.deleteDriver(driverId);
+  }
 }

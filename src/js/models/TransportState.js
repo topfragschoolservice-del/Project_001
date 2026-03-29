@@ -176,6 +176,69 @@ export class TransportState {
     return route;
   }
 
+  createStudent({ name, route, paymentDue }) {
+    const nextNum = this.students.length + 101;
+    const student = {
+      id: `S-${nextNum}`,
+      name,
+      route,
+      attending: true,
+      returnTrip: true,
+      pickup: "pending",
+      drop: "pending",
+      paymentDue,
+    };
+    this.students.push(student);
+    return student;
+  }
+
+  updateStudentRoute(studentId, route) {
+    const student = this.students.find((s) => s.id === studentId);
+    if (!student) return null;
+    student.route = route;
+    return student;
+  }
+
+  deleteStudent(studentId) {
+    const idx = this.students.findIndex((s) => s.id === studentId);
+    if (idx === -1) return null;
+    const [student] = this.students.splice(idx, 1);
+    return student;
+  }
+
+  createDriver({ name, status }) {
+    const nextNum = this.drivers.length + 1;
+    const id = `D-${String(nextNum).padStart(2, "0")}`;
+    const driver = {
+      id,
+      name,
+      route: "Unassigned",
+      status,
+    };
+    this.drivers.push(driver);
+    return driver;
+  }
+
+  updateDriverStatus(driverId, status) {
+    const driver = this.drivers.find((d) => d.id === driverId);
+    if (!driver) return null;
+    driver.status = status;
+    return driver;
+  }
+
+  deleteDriver(driverId) {
+    const idx = this.drivers.findIndex((d) => d.id === driverId);
+    if (idx === -1) return null;
+
+    const [driver] = this.drivers.splice(idx, 1);
+    this.routes.forEach((r) => {
+      if (r.driverId === driverId) {
+        r.driverId = null;
+      }
+    });
+    return driver;
+  }
+
   snapshot() {
     return {
       schoolName: this.schoolName,

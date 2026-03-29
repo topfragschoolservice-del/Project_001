@@ -78,4 +78,46 @@ export class TransportService {
     this.events.push(`Route removed: ${route.name}`, "warn", "admin");
     return route;
   }
+
+  async createStudent(payload) {
+    const student = await this.api.createStudent(payload);
+    if (!student) return null;
+    this.events.push(`Student added: ${student.name}`, "info", "admin");
+    return student;
+  }
+
+  async updateStudentRoute(studentId, route) {
+    const student = await this.api.updateStudentRoute(studentId, route);
+    if (!student) return null;
+    this.events.push(`Student route updated: ${student.name} -> ${route}`, "info", "admin");
+    return student;
+  }
+
+  async deleteStudent(studentId) {
+    const student = await this.api.deleteStudent(studentId);
+    if (!student) return null;
+    this.events.push(`Student removed: ${student.name}`, "warn", "admin");
+    return student;
+  }
+
+  async createDriver(payload) {
+    const driver = await this.api.createDriver(payload);
+    if (!driver) return null;
+    this.events.push(`Driver added: ${driver.name}`, "info", "admin");
+    return driver;
+  }
+
+  async updateDriverStatus(driverId, status) {
+    const driver = await this.api.updateDriverStatus(driverId, status);
+    if (!driver) return null;
+    this.events.push(`Driver status updated: ${driver.name} -> ${status}`, "info", "admin");
+    return driver;
+  }
+
+  async deleteDriver(driverId) {
+    const driver = await this.api.deleteDriver(driverId);
+    if (!driver) return null;
+    this.events.push(`Driver removed: ${driver.name}`, "warn", "admin");
+    return driver;
+  }
 }
