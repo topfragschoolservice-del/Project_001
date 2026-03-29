@@ -60,4 +60,25 @@ export class TransportState {
       this.vehicleProgress = 0;
     }
   }
+
+  snapshot() {
+    return {
+      schoolName: this.schoolName,
+      date: this.date.toISOString(),
+      students: this.students,
+      drivers: this.drivers,
+      vehicleProgress: this.vehicleProgress,
+      monthlyReport: this.monthlyReport,
+    };
+  }
+
+  hydrate(payload) {
+    if (!payload) return;
+    this.schoolName = payload.schoolName || this.schoolName;
+    this.date = payload.date ? new Date(payload.date) : this.date;
+    this.students = Array.isArray(payload.students) ? payload.students : this.students;
+    this.drivers = Array.isArray(payload.drivers) ? payload.drivers : this.drivers;
+    this.vehicleProgress = typeof payload.vehicleProgress === "number" ? payload.vehicleProgress : this.vehicleProgress;
+    this.monthlyReport = payload.monthlyReport || this.monthlyReport;
+  }
 }
