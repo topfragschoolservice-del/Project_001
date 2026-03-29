@@ -16,12 +16,26 @@
       <p class="kicker">School Mobility Platform</p>
       <h1>Smart Transport Management</h1>
     </div>
-    <button id="btnSimulateDay" class="btn ghost">Simulate School Day</button>
+    <div class="top-actions">
+      <form id="roleForm" class="role-form">
+        <label for="roleSelect">Login As</label>
+        <select id="roleSelect">
+          <option value="">Select Role</option>
+          <option value="parent">Parent</option>
+          <option value="driver">Driver</option>
+          <option value="admin">Admin</option>
+        </select>
+        <button class="btn primary" type="submit">Apply Role</button>
+      </form>
+      <button id="btnLogout" class="btn ghost">Logout</button>
+      <button id="btnSimulateDay" class="btn ghost">Simulate School Day</button>
+    </div>
   </header>
 
   <main class="shell grid-layout">
     <aside class="panel nav-panel">
       <h2>Modules</h2>
+      <p id="activeRole" class="soft">Role: Guest</p>
       <nav id="moduleNav" class="module-nav"></nav>
       <div class="status-block">
         <h3>Today</h3>
