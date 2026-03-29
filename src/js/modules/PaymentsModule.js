@@ -46,12 +46,11 @@ export class PaymentsModule extends BaseModule {
       </div>
     `;
 
-    root.querySelector("#payForm").addEventListener("submit", (e) => {
+    root.querySelector("#payForm").addEventListener("submit", async (e) => {
       e.preventDefault();
       const studentId = root.querySelector("#payStudent").value;
-      const student = this.state.completePayment(studentId);
+      const student = await this.transportService.completePayment(studentId);
       if (!student) return;
-      this.events.push(`Payment received for ${student.name}`, "info", "payment");
       this.onChange();
     });
   }

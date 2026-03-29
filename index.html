@@ -18,17 +18,19 @@
     </div>
     <div class="top-actions">
       <form id="roleForm" class="role-form">
-        <label for="roleSelect">Login As</label>
-        <select id="roleSelect">
-          <option value="">Select Role</option>
-          <option value="parent">Parent</option>
-          <option value="driver">Driver</option>
-          <option value="admin">Admin</option>
-        </select>
-        <button class="btn primary" type="submit">Apply Role</button>
+        <div>
+          <label for="loginEmail">Email</label>
+          <input id="loginEmail" type="email" placeholder="user@school.lk" required />
+        </div>
+        <div>
+          <label for="loginPassword">Password</label>
+          <input id="loginPassword" type="password" placeholder="Enter password" required />
+        </div>
+        <button class="btn primary" type="submit">Sign In</button>
       </form>
       <button id="btnLogout" class="btn ghost">Logout</button>
       <button id="btnSimulateDay" class="btn ghost">Simulate School Day</button>
+      <p class="auth-hint">Demo: parent@school.lk / parent123, driver@school.lk / driver123, admin@school.lk / admin123</p>
     </div>
   </header>
 

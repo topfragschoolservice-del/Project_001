@@ -2,6 +2,10 @@ import { EventStore } from "./models/EventStore.js";
 import { TransportState } from "./models/TransportState.js";
 import { AuthSession } from "./models/AuthSession.js";
 import { PersistenceStore } from "./models/PersistenceStore.js";
+import { MockTransportApi } from "./services/MockTransportApi.js";
+import { TransportService } from "./services/TransportService.js";
+import { MockAuthApi } from "./services/MockAuthApi.js";
+import { AuthService } from "./services/AuthService.js";
 import { DashboardModule } from "./modules/DashboardModule.js";
 import { ParentModule } from "./modules/ParentModule.js";
 import { DriverModule } from "./modules/DriverModule.js";
@@ -16,14 +20,18 @@ export class Application {
     this.events = new EventStore();
     this.auth = new AuthSession();
     this.persistence = new PersistenceStore();
+    this.mockApi = new MockTransportApi(this.state);
+    this.transportService = new TransportService(this.mockApi, this.events);
+    this.mockAuthApi = new MockAuthApi();
+    this.authService = new AuthService(this.mockAuthApi, this.events);
     this.modules = {
-      dashboard: new DashboardModule(this.state, this.events, this.renderAll.bind(this)),
-      parent: new ParentModule(this.state, this.events, this.renderAll.bind(this)),
-      driver: new DriverModule(this.state, this.events, this.renderAll.bind(this)),
-      tracking: new TrackingModule(this.state, this.events, this.renderAll.bind(this)),
-      reports: new ReportsModule(this.state, this.events, this.renderAll.bind(this)),
-      admin: new AdminModule(this.state, this.events, this.renderAll.bind(this)),
-      payments: new PaymentsModule(this.state, this.events, this.renderAll.bind(this)),
+      dashboard: new DashboardModule(this.state, this.events, this.renderAll.bind(this), this.transportService),
+      parent: new ParentModule(this.state, this.events, this.renderAll.bind(this), this.transportService),
+      driver: new DriverModule(this.state, this.events, this.renderAll.bind(this), this.transportService),
+      tracking: new TrackingModule(this.state, this.events, this.renderAll.bind(this), this.transportService),
+      reports: new ReportsModule(this.state, this.events, this.renderAll.bind(this), this.transportService),
+      admin: new AdminModule(this.state, this.events, this.renderAll.bind(this), this.transportService),
+      payments: new PaymentsModule(this.state, this.events, this.renderAll.bind(this), this.transportService),
     };
     this.activeModule = "dashboard";
     this.activeEventFilter = "all";
@@ -60,29 +68,31 @@ export class Application {
 
   setupAuth() {
     const roleForm = document.querySelector("#roleForm");
-    const roleSelect = document.querySelector("#roleSelect");
+    const loginEmail = document.querySelector("#loginEmail");
+    const loginPassword = document.querySelector("#loginPassword");
     const logoutBtn = document.querySelector("#btnLogout");
 
-    roleForm.addEventListener("submit", (e) => {
+    roleForm.addEventListener("submit", async (e) => {
       e.preventDefault();
-      const selectedRole = roleSelect.value;
-      if (!this.auth.login(selectedRole)) {
-        this.events.push("Please select a valid role to continue", "warn", "auth");
+      const email = loginEmail.value.trim();
+      const password = loginPassword.value;
+
+      const user = await this.authService.login(email, password);
+      if (!user || !this.auth.loginWithUser(user)) {
         this.renderAll();
         return;
       }
-      const roleLabel = selectedRole.charAt(0).toUpperCase() + selectedRole.slice(1);
-      this.events.push(`${roleLabel} logged in`, "info", "auth");
+
+      loginPassword.value = "";
       this.activeModule = this.auth.allowedModules()[0];
       this.renderAll();
     });
 
-    logoutBtn.addEventListener("click", () => {
+    logoutBtn.addEventListener("click", async () => {
       if (!this.auth.isLoggedIn()) return;
-      const roleLabel = this.auth.currentRole;
+      await this.authService.logout(this.auth.currentUser?.name, this.auth.currentRole);
       this.auth.logout();
       this.activeModule = "dashboard";
-      this.events.push(`${roleLabel} logged out`, "info", "auth");
       this.renderAll();
     });
   }
@@ -144,18 +154,13 @@ export class Application {
     const todayDate = document.querySelector("#todayDate");
     todayDate.textContent = this.state.date.toDateString();
 
-    document.querySelector("#btnSimulateDay").addEventListener("click", () => {
+    document.querySelector("#btnSimulateDay").addEventListener("click", async () => {
       if (!this.auth.isLoggedIn()) {
         this.events.push("Login required to run simulation", "warn", "auth");
         this.renderAll();
         return;
       }
-      this.state.students.forEach((s) => {
-        if (!s.attending) return;
-        s.pickup = Math.random() > 0.12 ? "picked" : "pending";
-        s.drop = s.returnTrip ? (Math.random() > 0.22 ? "dropped" : "pending") : "n/a";
-      });
-      this.events.push("Simulation executed for pickup and drop-off flow", "info", "system");
+      await this.transportService.simulateSchoolDay();
       this.renderAll();
     });
   }
@@ -171,10 +176,11 @@ export class Application {
     const allowedSet = new Set(this.auth.allowedModules());
     const isLoggedIn = this.auth.isLoggedIn();
     const roleNode = document.querySelector("#activeRole");
+    const userName = this.auth.currentUser?.name || "Guest User";
     const roleLabel = isLoggedIn
       ? this.auth.currentRole.charAt(0).toUpperCase() + this.auth.currentRole.slice(1)
       : "Guest";
-    roleNode.textContent = `Role: ${roleLabel}`;
+    roleNode.textContent = `Role: ${roleLabel} | User: ${userName}`;
 
     document.querySelectorAll("#moduleNav button").forEach((btn) => {
       const target = btn.dataset.target;
@@ -203,7 +209,7 @@ export class Application {
       const dashboard = document.querySelector("#dashboard");
       dashboard.innerHTML = `
         <h2>Welcome</h2>
-        <p class="soft">Select a role from the top-right area to access modules.</p>
+        <p class="soft">Sign in from the top-right area to access role-based modules.</p>
       `;
       document.querySelectorAll(".module").forEach((module) => {
         module.classList.toggle("active", module.dataset.module === "dashboard");

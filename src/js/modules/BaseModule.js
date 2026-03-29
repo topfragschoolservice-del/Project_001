@@ -1,8 +1,9 @@
 export class BaseModule {
-  constructor(state, events, onChange) {
+  constructor(state, events, onChange, transportService) {
     this.state = state;
     this.events = events;
     this.onChange = onChange;
+    this.transportService = transportService;
   }
 
   badgeFor(status) {

@@ -78,8 +78,15 @@ h4 {
   color: var(--soft-ink);
 }
 
-.role-form select {
-  min-width: 160px;
+.role-form input {
+  min-width: 170px;
+}
+
+.auth-hint {
+  margin: 0;
+  font-size: 0.74rem;
+  color: var(--soft-ink);
+  max-width: 460px;
 }
 
 .kicker {

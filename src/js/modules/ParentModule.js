@@ -44,14 +44,13 @@ export class ParentModule extends BaseModule {
       </div>
     `;
 
-    root.querySelector("#attendanceForm").addEventListener("submit", (e) => {
+    root.querySelector("#attendanceForm").addEventListener("submit", async (e) => {
       e.preventDefault();
       const studentId = root.querySelector("#attStudent").value;
       const attending = root.querySelector("#attending").value === "yes";
       const returnTrip = root.querySelector("#returnTrip").value === "yes";
-      const student = this.state.markAttendance(studentId, attending, returnTrip);
+      const student = await this.transportService.markAttendance(studentId, attending, returnTrip);
       if (!student) return;
-      this.events.push(`${student.name} attendance updated by parent`, attending ? "info" : "warn", "attendance");
       this.onChange();
     });
   }

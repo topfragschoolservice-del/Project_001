@@ -45,14 +45,12 @@ export class DriverModule extends BaseModule {
       </div>
     `;
 
-    root.querySelector("#moveForm").addEventListener("submit", (e) => {
+    root.querySelector("#moveForm").addEventListener("submit", async (e) => {
       e.preventDefault();
       const studentId = root.querySelector("#moveStudent").value;
       const moveType = root.querySelector("#moveType").value;
-      const student = moveType === "pickup" ? this.state.markPickup(studentId, "picked") : this.state.markDropoff(studentId, "dropped");
+      const student = await this.transportService.markStudentMovement(studentId, moveType);
       if (!student) return;
-      const category = moveType === "pickup" ? "pickup" : "dropoff";
-      this.events.push(`${student.name} ${moveType === "pickup" ? "picked up" : "dropped off"}`, "info", category);
       this.onChange();
     });
   }
