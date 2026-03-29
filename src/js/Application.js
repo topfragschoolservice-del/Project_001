@@ -1,6 +1,7 @@
 import { EventStore } from "./models/EventStore.js";
 import { TransportState } from "./models/TransportState.js";
 import { AuthSession } from "./models/AuthSession.js";
+import { PersistenceStore } from "./models/PersistenceStore.js";
 import { DashboardModule } from "./modules/DashboardModule.js";
 import { ParentModule } from "./modules/ParentModule.js";
 import { DriverModule } from "./modules/DriverModule.js";
@@ -13,6 +14,7 @@ export class Application {
     this.state = new TransportState();
     this.events = new EventStore();
     this.auth = new AuthSession();
+    this.persistence = new PersistenceStore();
     this.modules = {
       dashboard: new DashboardModule(this.state, this.events, this.renderAll.bind(this)),
       parent: new ParentModule(this.state, this.events, this.renderAll.bind(this)),
@@ -33,6 +35,7 @@ export class Application {
   }
 
   mount() {
+    this.restoreFromStorage();
     this.setupAuth();
     this.setupNav();
     this.setupGlobalActions();
@@ -65,6 +68,28 @@ export class Application {
       this.activeModule = "dashboard";
       this.events.push(`${roleLabel} logged out`, "info");
       this.renderAll();
+    });
+  }
+
+  restoreFromStorage() {
+    const snapshot = this.persistence.load();
+    if (!snapshot) return;
+
+    this.state.hydrate(snapshot.state);
+    this.events.hydrate(snapshot.events);
+    this.auth.hydrate(snapshot.auth);
+
+    if (typeof snapshot.activeModule === "string") {
+      this.activeModule = snapshot.activeModule;
+    }
+  }
+
+  saveToStorage() {
+    this.persistence.save({
+      state: this.state.snapshot(),
+      events: this.events.snapshot(),
+      auth: this.auth.snapshot(),
+      activeModule: this.activeModule,
     });
   }
 
@@ -104,6 +129,7 @@ export class Application {
     this.renderNavState();
     this.renderModules();
     this.renderEvents();
+    this.saveToStorage();
   }
 
   renderNavState() {
