@@ -40,12 +40,12 @@ export class AdminModule extends BaseModule {
     `;
 
     root.querySelector("#btnLateWarn").addEventListener("click", () => {
-      this.events.push("Delay alert sent to affected parents", "warn");
+      this.events.push("Delay alert sent to affected parents", "warn", "admin");
       this.onChange();
     });
 
     root.querySelector("#btnDailyReport").addEventListener("click", () => {
-      this.events.push("Daily transport report generated", "info");
+      this.events.push("Daily transport report generated", "info", "admin");
       this.onChange();
     });
   }

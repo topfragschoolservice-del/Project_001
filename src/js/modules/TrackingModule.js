@@ -27,7 +27,7 @@ export class TrackingModule extends BaseModule {
 
     root.querySelector("#btnAdvance").addEventListener("click", () => {
       this.state.simulateProgress();
-      this.events.push(`Vehicle progress updated to ${this.state.vehicleProgress}%`, "info");
+      this.events.push(`Vehicle progress updated to ${this.state.vehicleProgress}%`, "info", "tracking");
       this.onChange();
     });
   }

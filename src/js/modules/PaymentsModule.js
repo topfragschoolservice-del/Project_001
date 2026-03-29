@@ -51,7 +51,7 @@ export class PaymentsModule extends BaseModule {
       const studentId = root.querySelector("#payStudent").value;
       const student = this.state.completePayment(studentId);
       if (!student) return;
-      this.events.push(`Payment received for ${student.name}`, "info");
+      this.events.push(`Payment received for ${student.name}`, "info", "payment");
       this.onChange();
     });
   }

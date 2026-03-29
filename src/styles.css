@@ -306,6 +306,29 @@ td {
   overflow: auto;
 }
 
+.event-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.7rem;
+}
+
+.event-filters button {
+  border: 1px solid var(--border);
+  background: #f5f9f9;
+  color: var(--ink);
+  border-radius: 999px;
+  padding: 0.3rem 0.62rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.event-filters button.active {
+  background: #d9eeee;
+  border-color: #89bdbd;
+}
+
 .event-feed li {
   background: var(--card);
   border: 1px solid var(--border);
@@ -313,6 +336,15 @@ td {
   border-radius: 12px;
   padding: 0.55rem 0.65rem;
 }
+
+.event-feed li[data-category="attendance"] { border-left-color: #3b7f4b; }
+.event-feed li[data-category="pickup"] { border-left-color: #268a8f; }
+.event-feed li[data-category="dropoff"] { border-left-color: #4b76b3; }
+.event-feed li[data-category="payment"] { border-left-color: #ad6f1f; }
+.event-feed li[data-category="tracking"] { border-left-color: #8a56a9; }
+.event-feed li[data-category="admin"] { border-left-color: #7652bf; }
+.event-feed li[data-category="auth"] { border-left-color: #5a5a5a; }
+.event-feed li[data-category="system"] { border-left-color: #0f686d; }
 
 .event-feed small,
 .soft {

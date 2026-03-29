@@ -26,6 +26,7 @@ export class Application {
       payments: new PaymentsModule(this.state, this.events, this.renderAll.bind(this)),
     };
     this.activeModule = "dashboard";
+    this.activeEventFilter = "all";
     this.navConfig = [
       { id: "dashboard", label: "Overview" },
       { id: "parent", label: "Parent Portal" },
@@ -35,12 +36,24 @@ export class Application {
       { id: "admin", label: "Admin Dashboard" },
       { id: "payments", label: "Payments" },
     ];
+    this.eventFilters = [
+      { id: "all", label: "All" },
+      { id: "attendance", label: "Attendance" },
+      { id: "pickup", label: "Pickup" },
+      { id: "dropoff", label: "Drop-off" },
+      { id: "payment", label: "Payment" },
+      { id: "tracking", label: "Tracking" },
+      { id: "admin", label: "Admin" },
+      { id: "auth", label: "Auth" },
+      { id: "system", label: "System" },
+    ];
   }
 
   mount() {
     this.restoreFromStorage();
     this.setupAuth();
     this.setupNav();
+    this.setupEventFilters();
     this.setupGlobalActions();
     this.renderAll();
   }
@@ -54,12 +67,12 @@ export class Application {
       e.preventDefault();
       const selectedRole = roleSelect.value;
       if (!this.auth.login(selectedRole)) {
-        this.events.push("Please select a valid role to continue", "warn");
+        this.events.push("Please select a valid role to continue", "warn", "auth");
         this.renderAll();
         return;
       }
       const roleLabel = selectedRole.charAt(0).toUpperCase() + selectedRole.slice(1);
-      this.events.push(`${roleLabel} logged in`, "info");
+      this.events.push(`${roleLabel} logged in`, "info", "auth");
       this.activeModule = this.auth.allowedModules()[0];
       this.renderAll();
     });
@@ -69,8 +82,23 @@ export class Application {
       const roleLabel = this.auth.currentRole;
       this.auth.logout();
       this.activeModule = "dashboard";
-      this.events.push(`${roleLabel} logged out`, "info");
+      this.events.push(`${roleLabel} logged out`, "info", "auth");
       this.renderAll();
+    });
+  }
+
+  setupEventFilters() {
+    const filterRoot = document.querySelector("#eventFilters");
+    filterRoot.innerHTML = this.eventFilters
+      .map((f) => `<button data-filter="${f.id}">${f.label}</button>`)
+      .join("");
+
+    filterRoot.addEventListener("click", (e) => {
+      const btn = e.target.closest("button[data-filter]");
+      if (!btn) return;
+      this.activeEventFilter = btn.dataset.filter;
+      this.renderEvents();
+      this.saveToStorage();
     });
   }
 
@@ -85,6 +113,9 @@ export class Application {
     if (typeof snapshot.activeModule === "string") {
       this.activeModule = snapshot.activeModule;
     }
+    if (typeof snapshot.activeEventFilter === "string") {
+      this.activeEventFilter = snapshot.activeEventFilter;
+    }
   }
 
   saveToStorage() {
@@ -93,6 +124,7 @@ export class Application {
       events: this.events.snapshot(),
       auth: this.auth.snapshot(),
       activeModule: this.activeModule,
+      activeEventFilter: this.activeEventFilter,
     });
   }
 
@@ -114,7 +146,7 @@ export class Application {
 
     document.querySelector("#btnSimulateDay").addEventListener("click", () => {
       if (!this.auth.isLoggedIn()) {
-        this.events.push("Login required to run simulation", "warn");
+        this.events.push("Login required to run simulation", "warn", "auth");
         this.renderAll();
         return;
       }
@@ -123,7 +155,7 @@ export class Application {
         s.pickup = Math.random() > 0.12 ? "picked" : "pending";
         s.drop = s.returnTrip ? (Math.random() > 0.22 ? "dropped" : "pending") : "n/a";
       });
-      this.events.push("Simulation executed for pickup and drop-off flow", "info");
+      this.events.push("Simulation executed for pickup and drop-off flow", "info", "system");
       this.renderAll();
     });
   }
@@ -187,8 +219,21 @@ export class Application {
 
   renderEvents() {
     const feed = document.querySelector("#eventFeed");
-    feed.innerHTML = this.events.items
-      .map((e) => `<li><strong>${e.message}</strong><br /><small>${e.time}</small></li>`)
+    const filterRoot = document.querySelector("#eventFilters");
+    filterRoot.querySelectorAll("button").forEach((btn) => {
+      btn.classList.toggle("active", btn.dataset.filter === this.activeEventFilter);
+    });
+
+    const visibleItems = this.activeEventFilter === "all"
+      ? this.events.items
+      : this.events.items.filter((e) => e.category === this.activeEventFilter);
+
+    feed.innerHTML = visibleItems
+      .map((e) => `<li data-category="${e.category}"><strong>${e.message}</strong><br /><small>${e.time} - ${e.category}</small></li>`)
       .join("");
+
+    if (visibleItems.length === 0) {
+      feed.innerHTML = "<li><strong>No events</strong><br /><small>Try another filter.</small></li>";
+    }
   }
 }

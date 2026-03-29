@@ -51,7 +51,8 @@ export class DriverModule extends BaseModule {
       const moveType = root.querySelector("#moveType").value;
       const student = moveType === "pickup" ? this.state.markPickup(studentId, "picked") : this.state.markDropoff(studentId, "dropped");
       if (!student) return;
-      this.events.push(`${student.name} ${moveType === "pickup" ? "picked up" : "dropped off"}`, "info");
+      const category = moveType === "pickup" ? "pickup" : "dropoff";
+      this.events.push(`${student.name} ${moveType === "pickup" ? "picked up" : "dropped off"}`, "info", category);
       this.onChange();
     });
   }

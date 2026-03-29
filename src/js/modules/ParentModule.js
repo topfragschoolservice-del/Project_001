@@ -51,7 +51,7 @@ export class ParentModule extends BaseModule {
       const returnTrip = root.querySelector("#returnTrip").value === "yes";
       const student = this.state.markAttendance(studentId, attending, returnTrip);
       if (!student) return;
-      this.events.push(`${student.name} attendance updated by parent`, attending ? "info" : "warn");
+      this.events.push(`${student.name} attendance updated by parent`, attending ? "info" : "warn", "attendance");
       this.onChange();
     });
   }
