@@ -86,3 +86,14 @@ export const login = catchAsync(async (req, res, next) => {
     }
   });
 });
+
+/**
+ * Logs out the user
+ * Note: In a stateless JWT setup, the client must delete the tokens.
+ */
+export const logout = (req, res) => {
+  res.status(200).json({
+    status: 'success',
+    message: 'Logged out successfully. Please clear your tokens on the client side.'
+  });
+};
