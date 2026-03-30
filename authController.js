@@ -1,4 +1,5 @@
 import jwt from 'jsonwebtoken';
+import crypto from 'crypto';
 import User from './User.js';
 import { catchAsync } from './errorMiddleware.js';
 import AppError from './appError.js';
@@ -127,5 +128,34 @@ export const refresh = catchAsync(async (req, res, next) => {
     status: 'success',
     token: newAccessToken,
     refreshToken: newRefreshToken
+  });
+});
+
+/**
+ * Password Reset: Step 1 - Send Token
+ */
+export const forgotPassword = catchAsync(async (req, res, next) => {
+  // 1) Get user based on POSTed email
+  const user = await User.findOne({ email: req.body.email });
+  if (!user) {
+    return next(new AppError('There is no user with that email address.', 404));
+  }
+
+  // 2) Generate the random reset token
+  const resetToken = user.createPasswordResetToken();
+  await user.save({ validateBeforeSave: false });
+
+  // 3) Simulate sending it via email
+  // In a real app, you'd use Nodemailer. For now, we'll log it.
+  const resetURL = `${req.protocol}://${req.get('host')}/api/auth/resetPassword/${resetToken}`;
+  
+  console.log('--- PASSWORD RESET EMAIL SIMULATION ---');
+  console.log(`To: ${user.email}`);
+  console.log(`URL: ${resetURL}`);
+  console.log('---------------------------------------');
+
+  res.status(200).json({
+    status: 'success',
+    message: 'Token sent to email (check server console)!'
   });
 });
