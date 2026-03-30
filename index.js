@@ -2,6 +2,8 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
+import { globalErrorHandler } from './middleware/errorMiddleware.js';
+import AppError from './utils/appError.js';
 
 dotenv.config();
 
@@ -15,6 +17,14 @@ app.use(express.json());
 app.get('/health', (req, res) => {
   res.status(200).json({ status: 'OK', message: 'Smart Transport API is running' });
 });
+
+// Handle undefined routes
+app.all('*', (req, res, next) => {
+  next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404));
+});
+
+// Global Error Middleware
+app.use(globalErrorHandler);
 
 // Database Connection & Server Start
 const startServer = async () => {
