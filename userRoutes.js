@@ -1,6 +1,6 @@
 import express from 'express';
-import { getMe } from './userController.js';
-import { protect } from './authMiddleware.js';
+import { getMe, updateMyChildren } from './userController.js';
+import { protect, restrictTo } from './authMiddleware.js';
 
 const router = express.Router();
 
@@ -8,5 +8,6 @@ const router = express.Router();
 router.use(protect);
 
 router.get('/me', getMe);
+router.patch('/update-children', restrictTo('parent'), updateMyChildren);
 
 export default router;
