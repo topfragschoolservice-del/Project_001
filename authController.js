@@ -145,14 +145,14 @@ export const forgotPassword = catchAsync(async (req, res, next) => {
   const resetToken = user.createPasswordResetToken();
   await user.save({ validateBeforeSave: false });
 
-  // 3) Simulate sending it via email
-  // In a real app, you'd use Nodemailer. For now, we'll log it.
   const resetURL = `${req.protocol}://${req.get('host')}/api/auth/resetPassword/${resetToken}`;
   
-  console.log('--- PASSWORD RESET EMAIL SIMULATION ---');
-  console.log(`To: ${user.email}`);
-  console.log(`URL: ${resetURL}`);
-  console.log('---------------------------------------');
+  if (process.env.NODE_ENV === 'development') {
+    console.log('--- PASSWORD RESET EMAIL SIMULATION ---');
+    console.log(`To: ${user.email}`);
+    console.log(`URL: ${resetURL}`);
+    console.log('---------------------------------------');
+  }
 
   res.status(200).json({
     status: 'success',
