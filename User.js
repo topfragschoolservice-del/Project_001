@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
+import crypto from 'crypto';
 
 const userSchema = new mongoose.Schema({
   name: {
@@ -36,7 +37,9 @@ const userSchema = new mongoose.Schema({
     name: { type: String, required: true }
   }],
   vehicleDetails: { type: String },
-  status: { type: String, default: 'active' }
+  status: { type: String, default: 'active' },
+  passwordResetToken: String,
+  passwordResetExpires: Date
 }, { timestamps: true });
 
 // Hash password before saving
@@ -52,6 +55,21 @@ userSchema.pre('save', async function(next) {
 userSchema.methods.comparePassword = async function(candidatePassword) {
   // We need to use 'this.password' which is only available if we specifically select it in the query
   return await bcrypt.compare(candidatePassword, this.password);
+};
+
+// Method to create a temporary password reset token
+userSchema.methods.createPasswordResetToken = function() {
+  const resetToken = crypto.randomBytes(32).toString('hex');
+
+  // Hash the token and set to passwordResetToken field
+  this.passwordResetToken = crypto
+    .createHash('sha256')
+    .update(resetToken)
+    .digest('hex');
+
+  this.passwordResetExpires = Date.now() + 10 * 60 * 1000; // 10 minutes
+
+  return resetToken;
 };
 
 export default mongoose.model('User', userSchema);
