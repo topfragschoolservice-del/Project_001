@@ -5,6 +5,7 @@ import mongoose from 'mongoose';
 import { globalErrorHandler } from './middleware/errorMiddleware.js';
 import AppError from './utils/appError.js';
 import authRoutes from './authRoutes.js';
+import userRoutes from './userRoutes.js';
 
 dotenv.config();
 
@@ -21,6 +22,7 @@ app.get('/health', (req, res) => {
 
 // Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/users', userRoutes);
 
 // Handle undefined routes
 app.all('*', (req, res, next) => {
