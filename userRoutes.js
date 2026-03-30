@@ -1,5 +1,5 @@
 import express from 'express';
-import { getMe, updateMyChildren } from './userController.js';
+import { getMe, updateMyChildren, updateDriverProfile } from './userController.js';
 import { protect, restrictTo } from './authMiddleware.js';
 
 const router = express.Router();
@@ -9,5 +9,6 @@ router.use(protect);
 
 router.get('/me', getMe);
 router.patch('/update-children', restrictTo('parent'), updateMyChildren);
+router.patch('/update-driver-profile', restrictTo('driver'), updateDriverProfile);
 
 export default router;

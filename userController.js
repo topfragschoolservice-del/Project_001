@@ -30,3 +30,21 @@ export const updateMyChildren = catchAsync(async (req, res, next) => {
     }
   });
 });
+
+/**
+ * Updates driver-specific fields (vehicle details, status)
+ */
+export const updateDriverProfile = catchAsync(async (req, res, next) => {
+  const { vehicleDetails, status } = req.body;
+
+  const updatedUser = await User.findByIdAndUpdate(
+    req.user.id,
+    { vehicleDetails, status },
+    { new: true, runValidators: true }
+  );
+
+  res.status(200).json({
+    status: 'success',
+    data: { user: updatedUser }
+  });
+});
