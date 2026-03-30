@@ -1,3 +1,4 @@
+import jwt from 'jsonwebtoken';
 import User from './User.js';
 import { catchAsync } from './errorMiddleware.js';
 import AppError from './appError.js';
@@ -97,3 +98,34 @@ export const logout = (req, res) => {
     message: 'Logged out successfully. Please clear your tokens on the client side.'
   });
 };
+
+/**
+ * Refresh Access Token using a Refresh Token
+ */
+export const refresh = catchAsync(async (req, res, next) => {
+  const { refreshToken } = req.body;
+
+  if (!refreshToken) {
+    return next(new AppError('Refresh token is required', 400));
+  }
+
+  // 1) Verify refresh token
+  // Errors like 'TokenExpiredError' will be caught by our global error handler
+  const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
+
+  // 2) Check if user still exists
+  const user = await User.findById(decoded.id);
+  if (!user) {
+    return next(new AppError('The user belonging to this token no longer exists.', 401));
+  }
+
+  // 3) Generate new tokens (Rotation)
+  const newAccessToken = generateAccessToken(user);
+  const newRefreshToken = generateRefreshToken(user);
+
+  res.status(200).json({
+    status: 'success',
+    token: newAccessToken,
+    refreshToken: newRefreshToken
+  });
+});
