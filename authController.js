@@ -46,3 +46,43 @@ export const signup = catchAsync(async (req, res, next) => {
     }
   });
 });
+
+/**
+ * Authenticates a user and returns access/refresh tokens
+ */
+export const login = catchAsync(async (req, res, next) => {
+  const { email, password } = req.body;
+
+  // 1) Check if email and password exist
+  if (!email || !password) {
+    return next(new AppError('Please provide email and password', 400));
+  }
+
+  // 2) Check if user exists && password is correct
+  // We must explicitly .select('+password') because 'select: false' is set in the schema
+  const user = await User.findOne({ email }).select('+password');
+
+  if (!user || !(await user.comparePassword(password))) {
+    return next(new AppError('Incorrect email or password', 401));
+  }
+
+  // 3) Generate tokens
+  const accessToken = generateAccessToken(user);
+  const refreshToken = generateRefreshToken(user);
+
+  res.status(200).json({
+    status: 'success',
+    token: accessToken,
+    refreshToken,
+    data: {
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        phone: user.phone,
+        children: user.children
+      }
+    }
+  });
+});
