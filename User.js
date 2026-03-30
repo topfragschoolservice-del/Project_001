@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import bcrypt from 'bcryptjs';
 
 const userSchema = new mongoose.Schema({
   name: {
@@ -37,5 +38,20 @@ const userSchema = new mongoose.Schema({
   vehicleDetails: { type: String },
   status: { type: String, default: 'active' }
 }, { timestamps: true });
+
+// Hash password before saving
+userSchema.pre('save', async function(next) {
+  if (!this.isModified('password')) return next();
+  
+  const salt = await bcrypt.genSalt(10);
+  this.password = await bcrypt.hash(this.password, salt);
+  next();
+});
+
+// Method to compare passwords
+userSchema.methods.comparePassword = async function(candidatePassword) {
+  // We need to use 'this.password' which is only available if we specifically select it in the query
+  return await bcrypt.compare(candidatePassword, this.password);
+};
 
 export default mongoose.model('User', userSchema);
