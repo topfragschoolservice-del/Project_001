@@ -1,7 +1,7 @@
-import User from '../User.js';
-import { catchAsync } from '../errorMiddleware.js';
-import AppError from '../appError.js';
-import { generateAccessToken, generateRefreshToken } from '../authUtils.js';
+import User from './User.js';
+import { catchAsync } from './errorMiddleware.js';
+import AppError from './appError.js';
+import { generateAccessToken, generateRefreshToken } from './authUtils.js';
 
 /**
  * Registers a new user and returns access/refresh tokens
