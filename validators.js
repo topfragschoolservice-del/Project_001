@@ -41,3 +41,10 @@ export const updateChildrenValidator = validate(
     children: Joi.array().items(Joi.object({ name: Joi.string().required() })).required()
   })
 );
+
+export const updateDriverValidator = validate(
+  Joi.object({
+    vehicleDetails: Joi.string().required(),
+    status: Joi.string().valid('active', 'inactive', 'on-trip')
+  })
+);

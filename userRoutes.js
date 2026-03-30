@@ -9,6 +9,7 @@ import {
   deleteUser 
 } from './userController.js';
 import { protect, restrictTo } from './authMiddleware.js';
+import { updateChildrenValidator, updateDriverValidator } from './validators.js';
 
 const router = express.Router();
 
@@ -16,8 +17,8 @@ const router = express.Router();
 router.use(protect);
 
 router.get('/me', getMe);
-router.patch('/update-children', restrictTo('parent'), updateMyChildren);
-router.patch('/update-driver-profile', restrictTo('driver'), updateDriverProfile);
+router.patch('/update-children', restrictTo('parent'), updateChildrenValidator, updateMyChildren);
+router.patch('/update-driver-profile', restrictTo('driver'), updateDriverValidator, updateDriverProfile);
 
 // Admin only routes
 router.use(restrictTo('admin'));
